@@ -10,7 +10,15 @@ if ( file_exists( 'conn.php' ) ) {
 }
 $day = date( 'w' ) - 1;
 
-$turmas = $conn->query( "SELECT idturma, descricao FROM TURMAS;" );
+$turmas = $conn->query( "SELECT idturma, descricao FROM turmas ORDER BY descricao;" );
+$selectedTurma = 0;
+if(!empty($_COOKIE['id_turma'])) {
+    $selectedTurma = $_COOKIE['id_turma'];
+}
+
+if(isset($_POST['id_turma'])) {
+    $selectedTurma = $_POST['id_turma'];
+}
 ?>
 
 <div class="row" style="margin-top: 1em;">
@@ -20,7 +28,11 @@ $turmas = $conn->query( "SELECT idturma, descricao FROM TURMAS;" );
                 <select name="id_turma" id="turma">
 					<?php
 					while ( $row = $turmas->fetch_assoc() ) {
-						echo '<option value="' . $row['idturma'] . '">' . $row['descricao'] . '</option>';
+						echo '<option value="' . $row['idturma'] . '" ';
+						if($selectedTurma == $row['idturma']) {
+						    echo 'selected="selected"';
+                        }
+						echo '>' . $row['descricao'] . '</option>';
 					}
 					?>
                 </select>
@@ -58,7 +70,7 @@ $turmas = $conn->query( "SELECT idturma, descricao FROM TURMAS;" );
             </div>
 
             <div class="input-field col s12 m1">
-                <button class="waves-effect waves-light btn green darken-4" type="submit">
+                <button class="waves-effect waves-light btn green darken-4" type="submit"  style="width: 100%;">
                     <i class="material-icons">check</i>
                 </button>
             </div>
@@ -81,7 +93,7 @@ if ( isset( $_POST['id_turma'] ) || ! empty( $_COOKIE['id_turma'] ) ) {
 
 	$dailyQuery = "SELECT H.periodo PERIODO, H.descricao AULA, " .
 	              "H.inicio INICIO, H.fim FIM, D.sigla MATERIA, P.nome PROFESSOR " .
-	              "FROM ifsp_horarios.Horarios_disciplinas HD " .
+	              "FROM ifsp_horarios.horarios_disciplinas HD " .
 	              "INNER JOIN ifsp_horarios.disciplinas D ON (HD.iddisciplina=D.iddisciplina) " .
 	              "INNER JOIN ifsp_horarios.horarios H ON (HD.idhorario=H.idhorario) " .
 	              "INNER JOIN ifsp_horarios.turmas T ON (HD.idturma=T.idturma) " .
@@ -90,19 +102,41 @@ if ( isset( $_POST['id_turma'] ) || ! empty( $_COOKIE['id_turma'] ) ) {
 	              "ORDER BY HD.diasemana, PERIODO, INICIO ";
 
 	$result3 = $conn->query( $dailyQuery );
-	echo '<table class="striped">';
-	echo '<thead style="text-transform: uppercase; text-align: center"><tr><th>Período</th><th>Aula</th><th>Início</th><th>Fim</th><th>Cód.</th><th>Profesor</th></tr></thead><tbody>';
+
 
 	if ( mysqli_num_rows( $result3 ) > 0 ) {
+	    $periodo = "";
 		while ( $rows = mysqli_fetch_array( $result3, MYSQLI_ASSOC ) ) {
+		    if($rows['PERIODO'] != $periodo) {
+		        if($periodo != "") {
+			        tableClose();
+                }
+		        echo '<h5>' . $rows['PERIODO'] . '</h5>';
+		        tableOpen();
+			    $periodo = $rows['PERIODO'];
+            }
 			echo "<tr>";
-			foreach ( $rows as $data ) {
-				echo "<td align='center'>" . $data . "</td>";
-			}
+
+            echo "<td align='center'>" . $rows['AULA'] . "</td>";
+            echo "<td align='center'>" . $rows['INICIO'] . "</td>";
+            echo "<td align='center'>" . $rows['FIM'] . "</td>";
+            echo "<td align='center'>" . $rows['MATERIA'] . "</td>";
+            echo "<td align='center'>" . $rows['PROFESSOR'] . "</td>";
+
+			echo "</tr>";
 		}
-		echo "</tr>";
+
 	}
 
+
+}
+
+function tableOpen() {
+	echo '<table class="striped">';
+	echo '<thead style="text-transform: uppercase; text-align: center"><tr><th>Aula</th><th>Início</th><th>Fim</th><th>Cód.</th><th>Profesor</th></tr></thead><tbody>';
+}
+
+function tableClose() {
 	echo '</tbody></table>';
 }
 ?>

@@ -10,7 +10,7 @@ if ( file_exists( 'conn.php' ) ) {
 }
 $day = date( 'w' ) - 1;
 
-$turmas = $conn->query( "SELECT idturma, descricao FROM turmas ORDER BY descricao;" );
+$turmas = $conn->query( "SELECT idturma, descricao FROM turmas WHERE ativo=1 ORDER BY descricao;" );
 $selectedTurma = 0;
 if(!empty($_COOKIE['id_turma'])) {
     $selectedTurma = $_COOKIE['id_turma'];
@@ -18,6 +18,11 @@ if(!empty($_COOKIE['id_turma'])) {
 
 if(isset($_POST['id_turma'])) {
     $selectedTurma = $_POST['id_turma'];
+}
+
+$selectedDay = $day;
+if(isset($_POST['dia'])) {
+    $selectedDay = $_POST['dia'];
 }
 ?>
 
@@ -41,27 +46,27 @@ if(isset($_POST['id_turma'])) {
 
             <div class="input-field col s12 m5">
                 <select name="dia" id="dia">
-                    <option value="0" <?php if ( $day == 0 ) {
+                    <option value="0" <?php if ( $selectedDay == 0 ) {
 						echo 'selected="selected"';
 					} ?>>Segunda-feira
                     </option>
-                    <option value="1" <?php if ( $day == 1 ) {
+                    <option value="1" <?php if ( $selectedDay == 1 ) {
 						echo 'selected="selected"';
 					} ?>>Terça-feira
                     </option>
-                    <option value="2" <?php if ( $day == 2 ) {
+                    <option value="2" <?php if ( $selectedDay == 2 ) {
 						echo 'selected="selected"';
 					} ?>>Quarta-feira
                     </option>
-                    <option value="3" <?php if ( $day == 3 ) {
+                    <option value="3" <?php if ( $selectedDay == 3 ) {
 						echo 'selected="selected"';
 					} ?>>Quinta-feira
                     </option>
-                    <option value="4" <?php if ( $day == 4 ) {
+                    <option value="4" <?php if ( $selectedDay == 4 ) {
 						echo 'selected="selected"';
 					} ?>>Sexta-feira
                     </option>
-                    <option value="5" <?php if ( $day == 5 ) {
+                    <option value="5" <?php if ( $selectedDay == 5 ) {
 						echo 'selected="selected"';
 					} ?>>Sábado
                     </option>
